@@ -35,10 +35,11 @@ const ContactForm = () => {
     } else {
       updateContact(contact);
     }
+    clearAll();
+
     setAddedFlag(true);
     setTimeout(function() {
       setAddedFlag(false);
-      clearAll();
     }, 3000);
   };
 
