@@ -62,11 +62,6 @@ const ContactState = props => {
     }
   };
 
-  // // delete contact
-  // const deleteContact = id => {
-  //   dispatch({ type: DELETE_CONTACT, payload: id });
-  // };
-
   // clear contacts on logout
   const clearContacts = () => {
     dispatch({ type: CLEAR_CONTACTS });
@@ -82,12 +77,6 @@ const ContactState = props => {
     dispatch({ type: SET_CURRENT });
   };
 
-  // update contact
-  // const updateContact = contact => {
-  //   dispatch({ type: UPDATE_CONTACT, payload: contact });
-  // };
-
-  // update contact
   const updateContact = async contact => {
     const config = {
       headers: {

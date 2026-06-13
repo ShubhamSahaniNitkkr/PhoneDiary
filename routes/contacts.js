@@ -2,18 +2,17 @@ const express = require("express");
 const router = express.Router();
 const { check, validationResult } = require("express-validator");
 const auth = require("../middleware/auth");
-const User = require("../model/User");
 const Contact = require("../model/Contact");
-
-// @route get api/contacts
-// @des   get all users contact (mapped to single contact)
-// @acess Private
+const { isDemoMode } = require("../config/demo");
+const demoStore = require("../mock/store");
 
 router.get("/", auth, async (req, res) => {
   try {
-    const contacts = await Contact.find({ user: req.user.id }).sort({
-      date: -1
-    });
+    if (isDemoMode()) {
+      return res.json(demoStore.getContactsForUser(req.user.id));
+    }
+
+    const contacts = await Contact.find({ user: req.user.id }).sort({ date: -1 });
     res.json(contacts);
   } catch (err) {
     console.error(err.message);
@@ -21,19 +20,11 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-// @route Post api/contacts
-// @des   Add Contact
-// @acess Public
-
 router.post(
   "/",
   [
     auth,
-    [
-      check("name", "Please provide name")
-        .not()
-        .isEmpty()
-    ]
+    [check("name", "Please provide name").not().isEmpty()]
   ],
   async (req, res) => {
     const err = validationResult(req);
@@ -42,7 +33,19 @@ router.post(
     }
 
     const { name, email, phone, type } = req.body;
+
     try {
+      if (isDemoMode()) {
+        const contact = demoStore.createContact({
+          name,
+          email,
+          phone,
+          type,
+          user: req.user.id
+        });
+        return res.json(contact);
+      }
+
       const newContact = new Contact({
         name,
         email,
@@ -59,10 +62,6 @@ router.post(
   }
 );
 
-// @route PUT api/contacts/:id
-// @des   Update Contact
-// @acess Private
-
 router.put("/:id", auth, async (req, res) => {
   const { name, email, phone, type } = req.body;
   const updateContact = {};
@@ -72,14 +71,20 @@ router.put("/:id", auth, async (req, res) => {
   if (type) updateContact.type = type;
 
   try {
-    let contact = await Contact.findById(req.params.id);
-    if (!contact) return res.status(404).json({ msg: "contact not found" });
-
-    // make sure user owns the contact
-    if (contact.user.toString() != req.user.id) {
-      return res.status(401).json({ msg: "Not authorised" });
+    if (isDemoMode()) {
+      const contact = demoStore.findContactById(req.params.id);
+      if (!contact) return res.status(404).json({ msg: "contact not found" });
+      if (contact.user !== req.user.id) {
+        return res.status(401).json({ msg: "Not authorised" });
+      }
+      return res.json(demoStore.updateContact(req.params.id, updateContact));
     }
 
+    let contact = await Contact.findById(req.params.id);
+    if (!contact) return res.status(404).json({ msg: "contact not found" });
+    if (contact.user.toString() !== req.user.id) {
+      return res.status(401).json({ msg: "Not authorised" });
+    }
     contact = await Contact.findByIdAndUpdate(
       req.params.id,
       { $set: updateContact },
@@ -87,29 +92,32 @@ router.put("/:id", auth, async (req, res) => {
     );
     res.json(contact);
   } catch (error) {
-    console.error(err.message);
+    console.error(error.message);
     res.status(500).send("Server Error");
   }
 });
 
-// @route DELETE api/contacts/:id
-// @des   delete Contact
-// @acess Private
-
 router.delete("/:id", auth, async (req, res) => {
   try {
-    let contact = await Contact.findById(req.params.id);
-    if (!contact) return res.status(404).json({ msg: "contact not found" });
-
-    // make sure user owns the contact
-    if (contact.user.toString() != req.user.id) {
-      return res.status(401).json({ msg: "Not authorised" });
+    if (isDemoMode()) {
+      const contact = demoStore.findContactById(req.params.id);
+      if (!contact) return res.status(404).json({ msg: "contact not found" });
+      if (contact.user !== req.user.id) {
+        return res.status(401).json({ msg: "Not authorised" });
+      }
+      demoStore.deleteContact(req.params.id);
+      return res.json({ msg: "contact deleted" });
     }
 
+    let contact = await Contact.findById(req.params.id);
+    if (!contact) return res.status(404).json({ msg: "contact not found" });
+    if (contact.user.toString() !== req.user.id) {
+      return res.status(401).json({ msg: "Not authorised" });
+    }
     await Contact.findByIdAndRemove(req.params.id);
     res.json({ msg: "contact deleted" });
   } catch (error) {
-    console.error(err.message);
+    console.error(error.message);
     res.status(500).send("Server Error");
   }
 });

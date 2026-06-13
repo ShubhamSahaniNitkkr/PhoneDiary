@@ -1,34 +1,28 @@
 {
-  "name": "contactkeepermern",
+  "name": "phonediary",
   "version": "1.0.0",
-  "description": "",
+  "description": "MERN contact keeper app",
   "main": "server.js",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "scripts": {
     "start": "node server.js",
     "server": "nodemon server.js",
     "ui": "npm start --prefix ui",
     "uiinstall": "npm install --prefix ui",
+    "build:ui": "npm run build --prefix ui",
+    "build": "npm run uiinstall && npm run build:ui",
+    "demo": "DEMO_MODE=true SERVE_UI=true node server.js",
     "dev": "concurrently \"npm run server\" \"npm run ui\""
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ShubhamSahaniNitkkr/contactKeeperMERN.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ShubhamSahaniNitkkr/contactKeeperMERN/issues"
-  },
-  "homepage": "https://github.com/ShubhamSahaniNitkkr/contactKeeperMERN#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "config": "^3.2.4",
     "express": "^4.17.1",
     "express-validator": "^6.3.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.8.1",
-    "react-scripts": "^3.3.0"
+    "mongoose": "^5.8.1"
   },
   "devDependencies": {
     "concurrently": "^5.0.1",

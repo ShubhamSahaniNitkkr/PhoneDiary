@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import setAuthToken from "./utils/setAuthToken";
 
@@ -17,6 +17,7 @@ import Alerts from "./components/layouts/Alerts";
 import Navbar from "./components/layouts/Navbar";
 import Home from "./components/pages/Home";
 import AboutUs from "./components/pages/AboutUs";
+import getBasename from "./getBasename";
 
 if (localStorage.token) setAuthToken(localStorage.token);
 
@@ -25,17 +26,15 @@ const App = () => {
     <AuthState>
       <ContactState>
         <AlertState>
-          <Router>
+          <Router basename={getBasename()}>
             <Navbar title={"Contact Keeper"} />
             <Alerts />
             <Switch>
-              <Fragment>
-                <Route exact path="/register" component={Register} />
-                <Route exact path="/login" component={Login} />
-                <Route exact path="/logout" component={Logout} />
-                <PrivateRoute exact path="/" component={Home} />
-                <PrivateRoute exact path="/aboutus" component={AboutUs} />
-              </Fragment>
+              <Route exact path="/register" component={Register} />
+              <Route exact path="/login" component={Login} />
+              <Route exact path="/logout" component={Logout} />
+              <PrivateRoute exact path="/" component={Home} />
+              <PrivateRoute exact path="/aboutus" component={AboutUs} />
             </Switch>
           </Router>
         </AlertState>

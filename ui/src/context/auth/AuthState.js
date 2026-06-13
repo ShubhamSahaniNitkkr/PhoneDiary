@@ -1,5 +1,4 @@
 import React, { useReducer } from "react";
-import uuid from "uuid";
 import axios from "axios";
 import setAuthToken from "../../utils/setAuthToken";
 import AuthReducer from "./authReducer";
